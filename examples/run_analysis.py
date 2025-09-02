@@ -172,6 +172,17 @@ def evaluate_models(results, features):
     
     # Evaluate each model
     for model_name, result in results.items():
+        logger.info(f"Evaluating {model_name}...")
+        logger.info(f"  Predictions shape: {result['predictions'].shape}")
+        logger.info(f"  Scores shape: {result['scores'].shape}")
+        logger.info(f"  Metadata: {result['metadata']}")
+        
+        if model_name == 'GNN':
+            # GNN returns predictions per symbol, not per row
+            # Skip evaluation for GNN as it has different output format
+            logger.info(f"Skipping evaluation for {model_name} (different output format)")
+            continue
+        
         evaluator.evaluate_model(
             model_name=model_name,
             y_true=y_true,
