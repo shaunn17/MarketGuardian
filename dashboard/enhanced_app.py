@@ -44,13 +44,29 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Enhanced CSS with modern design
+# Initialize session state with enhanced features FIRST
+if 'data' not in st.session_state:
+    st.session_state.data = None
+if 'features' not in st.session_state:
+    st.session_state.features = None
+if 'models' not in st.session_state:
+    st.session_state.models = {}
+if 'results' not in st.session_state:
+    st.session_state.results = {}
+if 'theme' not in st.session_state:
+    st.session_state.theme = 'light'
+if 'auto_refresh' not in st.session_state:
+    st.session_state.auto_refresh = False
+if 'notifications' not in st.session_state:
+    st.session_state.notifications = []
+
+# Enhanced CSS with modern design and working theme toggle
 st.markdown("""
 <style>
     /* Import Google Fonts */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
-    /* Root variables for theming */
+    /* Light theme variables */
     :root {
         --primary-color: #6366f1;
         --secondary-color: #8b5cf6;
@@ -58,10 +74,8 @@ st.markdown("""
         --warning-color: #f59e0b;
         --error-color: #ef4444;
         --info-color: #3b82f6;
-        --dark-bg: #0f172a;
-        --dark-surface: #1e293b;
-        --light-bg: #ffffff;
-        --light-surface: #f8fafc;
+        --bg-color: #ffffff;
+        --surface-color: #f8fafc;
         --text-primary: #1e293b;
         --text-secondary: #64748b;
         --border-color: #e2e8f0;
@@ -70,21 +84,34 @@ st.markdown("""
     }
     
     /* Dark theme variables */
-    [data-theme="dark"] {
+    .dark-theme {
         --primary-color: #818cf8;
         --secondary-color: #a78bfa;
         --success-color: #34d399;
         --warning-color: #fbbf24;
         --error-color: #f87171;
         --info-color: #60a5fa;
+        --bg-color: #0f172a;
+        --surface-color: #1e293b;
         --text-primary: #f1f5f9;
         --text-secondary: #94a3b8;
         --border-color: #334155;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Apply theme to body */
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
     
     /* Global styles */
     .main {
         font-family: 'Inter', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-primary);
     }
     
     /* Header styles */
@@ -280,7 +307,7 @@ st.markdown("""
     }
     
     ::-webkit-scrollbar-track {
-        background: var(--light-surface);
+        background: var(--surface-color);
     }
     
     ::-webkit-scrollbar-thumb {
@@ -291,24 +318,61 @@ st.markdown("""
     ::-webkit-scrollbar-thumb:hover {
         background: var(--secondary-color);
     }
+    
+    /* Theme toggle button */
+    .theme-toggle {
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+    
+    .theme-toggle:hover {
+        background: var(--primary-color);
+        color: white;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state with enhanced features
-if 'data' not in st.session_state:
-    st.session_state.data = None
-if 'features' not in st.session_state:
-    st.session_state.features = None
-if 'models' not in st.session_state:
-    st.session_state.models = {}
-if 'results' not in st.session_state:
-    st.session_state.results = {}
-if 'theme' not in st.session_state:
-    st.session_state.theme = 'light'
-if 'auto_refresh' not in st.session_state:
-    st.session_state.auto_refresh = False
-if 'notifications' not in st.session_state:
-    st.session_state.notifications = []
+# Apply theme using CSS classes that actually work
+theme_css = f"""
+<style>
+    /* Apply theme based on session state */
+    .stApp {{
+        background-color: {'#0f172a' if st.session_state.theme == 'dark' else '#ffffff'};
+        color: {'#f1f5f9' if st.session_state.theme == 'dark' else '#1e293b'};
+    }}
+    
+    .main .block-container {{
+        background-color: {'#0f172a' if st.session_state.theme == 'dark' else '#ffffff'};
+        color: {'#f1f5f9' if st.session_state.theme == 'dark' else '#1e293b'};
+    }}
+    
+    .css-1d391kg {{
+        background-color: {'#1e293b' if st.session_state.theme == 'dark' else '#f8fafc'};
+    }}
+    
+    /* Update metric cards for theme */
+    .metric-card {{
+        background: {'#1e293b' if st.session_state.theme == 'dark' else '#f8fafc'};
+        color: {'#f1f5f9' if st.session_state.theme == 'dark' else '#1e293b'};
+        border-color: {'#334155' if st.session_state.theme == 'dark' else '#e2e8f0'};
+    }}
+    
+    .metric-value {{
+        color: {'#818cf8' if st.session_state.theme == 'dark' else '#6366f1'};
+    }}
+    
+    .metric-label {{
+        color: {'#94a3b8' if st.session_state.theme == 'dark' else '#64748b'};
+    }}
+</style>
+"""
+st.markdown(theme_css, unsafe_allow_html=True)
+
+# Session state already initialized above
 
 def create_metric_card(title: str, value: str, delta: str = None, delta_color: str = "normal") -> str:
     """Create a styled metric card."""
@@ -364,8 +428,16 @@ def main():
         st.markdown('<h1 class="main-header">🚀 Financial Anomaly Detection Pro</h1>', unsafe_allow_html=True)
     
     with col2:
-        if st.button("🌙 Dark Mode" if st.session_state.theme == 'light' else "☀️ Light Mode"):
+        theme_button_text = "🌙 Dark Mode" if st.session_state.theme == 'light' else "☀️ Light Mode"
+        current_theme = "Dark" if st.session_state.theme == 'dark' else "Light"
+        
+        # Show current theme status with better styling
+        theme_color = "#94a3b8" if st.session_state.theme == 'dark' else "#64748b"
+        st.markdown(f'<div style="text-align: center; margin-bottom: 0.5rem; font-size: 0.875rem; color: {theme_color}; font-weight: 500;">Current: {current_theme} Theme</div>', unsafe_allow_html=True)
+        
+        if st.button(theme_button_text, key="theme_toggle"):
             st.session_state.theme = 'dark' if st.session_state.theme == 'light' else 'light'
+            st.success(f"Switched to {current_theme} theme!")
             st.rerun()
     
     with col3:
