@@ -238,19 +238,6 @@ predictions, scores, metadata = model.detect_anomalies(new_features_df)
 
 MIT License - Free for personal and commercial use.
 
-## 🙏 Acknowledgments
-
-- Yahoo Finance for providing free stock data
-- Binance and CoinGecko for cryptocurrency data APIs
-- The open-source community for the excellent libraries used in this project
-
-## 📞 Support
-
-For questions, issues, or contributions, please:
-1. Check the existing issues
-2. Create a new issue with detailed description
-3. Contact the maintainers
-
 ---
 
 **Note**: This system is for educational and research purposes. Always verify results and consider market conditions when making financial decisions.
