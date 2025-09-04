@@ -2328,7 +2328,7 @@ def show_ai_settings():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("#### 🔑 API Keys")
+        st.markdown("#### 🔑 OpenAI Configuration")
         
         openai_key = st.text_input(
             "OpenAI API Key",
@@ -2342,6 +2342,8 @@ def show_ai_settings():
             index=0,
             help="Select the OpenAI model to use"
         )
+        
+        st.info("💡 **Free Tier Available**: Get $5 in free credits at [platform.openai.com](https://platform.openai.com)")
     
     with col2:
         st.markdown("#### ⚙️ AI Parameters")
@@ -2361,6 +2363,15 @@ def show_ai_settings():
             step=100,
             help="Maximum tokens for AI responses"
         )
+        
+        temperature = st.slider(
+            "Response Creativity",
+            min_value=0.0,
+            max_value=1.0,
+            value=0.7,
+            step=0.1,
+            help="Higher values = more creative, Lower values = more focused"
+        )
     
     # Save AI settings
     if st.button("💾 Save AI Settings", type="primary"):
@@ -2369,7 +2380,18 @@ def show_ai_settings():
         st.session_state.openai_model = openai_model
         st.session_state.analysis_depth = analysis_depth
         st.session_state.max_tokens = max_tokens
+        st.session_state.temperature = temperature
         st.success("✅ AI settings saved!")
+    
+    # Demo mode info
+    st.markdown("---")
+    st.markdown("#### 🎭 Demo Mode")
+    st.info("""
+    **No API key needed for testing!** 
+    
+    The system includes a **Demo Mode** that shows you exactly what AI analysis would look like with real data. 
+    You can test all AI features without any setup - just go to the AI Analysis page and enable Demo Mode.
+    """)
 
 def show_analysis_settings():
     """Analysis and model configuration settings"""
@@ -2439,7 +2461,7 @@ def show_ai_analysis_page():
     with col1:
         ai_provider = st.selectbox(
             "AI Provider",
-            ["Demo Mode", "OpenAI", "Ollama (Local)"],
+            ["Demo Mode", "OpenAI"],
             index=0,
             help="Choose your AI provider"
         )
@@ -2448,27 +2470,19 @@ def show_ai_analysis_page():
         if ai_provider == "OpenAI":
             openai_key = st.text_input("OpenAI API Key", type="password", help="Enter your OpenAI API key")
             openai_model = st.selectbox("Model", ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"], index=0)
-        elif ai_provider == "Ollama (Local)":
-            local_model = st.selectbox("Local Model", ["llama2", "mistral", "codellama", "phi3"], index=0)
-            local_host = st.text_input("Ollama Host", value="http://localhost:11434")
         else:
             st.info("🎭 Using demo data for testing")
     
     with col3:
-        if ai_provider != "Demo Mode":
-            if st.button("🔧 Initialize AI", type="primary"):
-                if ai_provider == "OpenAI" and openai_key:
+        if ai_provider == "OpenAI":
+            if st.button("🔧 Initialize OpenAI", type="primary"):
+                if openai_key:
                     st.session_state.openai_key = openai_key
                     st.session_state.openai_model = openai_model
                     st.session_state.use_local_llm = False
                     st.success("✅ OpenAI initialized!")
-                elif ai_provider == "Ollama (Local)":
-                    st.session_state.use_local_llm = True
-                    st.session_state.local_model = local_model
-                    st.session_state.local_host = local_host
-                    st.success("✅ Ollama initialized!")
                 else:
-                    st.warning("⚠️ Please provide required configuration")
+                    st.warning("⚠️ Please enter your OpenAI API key")
     
     st.markdown("---")
     
