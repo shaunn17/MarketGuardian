@@ -2193,7 +2193,237 @@ def show_summary_statistics():
         st.info("Not enough numeric columns for correlation analysis.")
 
 def show_settings_page():
-    st.info("Settings page - Coming soon!")
+    """Comprehensive settings page for system configuration"""
+    
+    st.markdown('<h2 class="sub-header">⚙️ System Settings</h2>', unsafe_allow_html=True)
+    
+    # Settings Tabs
+    tab1, tab2, tab3, tab4 = st.tabs(["🎨 Appearance", "🔧 Data Collection", "🤖 AI Configuration", "📊 Analysis Settings"])
+    
+    with tab1:
+        show_appearance_settings()
+    
+    with tab2:
+        show_data_collection_settings()
+    
+    with tab3:
+        show_ai_settings()
+    
+    with tab4:
+        show_analysis_settings()
+
+def show_appearance_settings():
+    """Appearance and UI settings"""
+    st.markdown("### 🎨 Appearance Settings")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### 🌓 Theme Settings")
+        
+        # Theme selection
+        current_theme = st.session_state.get('theme', 'light')
+        new_theme = st.selectbox(
+            "Select Theme",
+            ["light", "dark"],
+            index=0 if current_theme == 'light' else 1,
+            help="Choose between light and dark theme"
+        )
+        
+        if new_theme != current_theme:
+            st.session_state.theme = new_theme
+            st.success(f"✅ Theme changed to {new_theme.title()}")
+            st.rerun()
+        
+        # Auto refresh setting
+        auto_refresh = st.checkbox(
+            "Enable Auto Refresh",
+            value=st.session_state.get('auto_refresh', False),
+            help="Automatically refresh data every 30 seconds"
+        )
+        
+        if auto_refresh != st.session_state.get('auto_refresh', False):
+            st.session_state.auto_refresh = auto_refresh
+            st.success(f"✅ Auto refresh {'enabled' if auto_refresh else 'disabled'}")
+    
+    with col2:
+        st.markdown("#### 📊 Chart Settings")
+        
+        # Chart theme
+        chart_theme = st.selectbox(
+            "Chart Theme",
+            ["plotly", "plotly_white", "plotly_dark", "ggplot2", "seaborn", "simple_white"],
+            index=0,
+            help="Choose the default theme for all charts"
+        )
+        
+        # Chart height
+        chart_height = st.slider(
+            "Default Chart Height",
+            min_value=300,
+            max_value=800,
+            value=500,
+            step=50,
+            help="Set the default height for all charts"
+        )
+    
+    # Save appearance settings
+    if st.button("💾 Save Appearance Settings", type="primary"):
+        st.session_state.chart_theme = chart_theme
+        st.session_state.chart_height = chart_height
+        st.success("✅ Appearance settings saved!")
+
+def show_data_collection_settings():
+    """Data collection configuration settings"""
+    st.markdown("### 🔧 Data Collection Settings")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### 📈 Yahoo Finance Settings")
+        
+        yahoo_symbols = st.text_area(
+            "Stock Symbols (one per line)",
+            value="AAPL\nGOOGL\nMSFT\nTSLA\nAMZN",
+            help="Enter stock symbols for data collection"
+        )
+        
+        yahoo_period = st.selectbox(
+            "Time Period",
+            ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"],
+            index=6,  # 1y
+            help="Select the time period for data collection"
+        )
+    
+    with col2:
+        st.markdown("#### 💰 Crypto Settings")
+        
+        crypto_symbols = st.text_area(
+            "Crypto Symbols (one per line)",
+            value="BTC-USD\nETH-USD\nBNB-USD\nADA-USD\nSOL-USD",
+            help="Enter cryptocurrency symbols"
+        )
+        
+        max_records = st.number_input(
+            "Maximum Records per Symbol",
+            min_value=100,
+            max_value=10000,
+            value=1000,
+            step=100,
+            help="Limit the number of records collected per symbol"
+        )
+    
+    # Save data collection settings
+    if st.button("💾 Save Data Collection Settings", type="primary"):
+        st.session_state.yahoo_symbols = yahoo_symbols.split('\n')
+        st.session_state.yahoo_period = yahoo_period
+        st.session_state.crypto_symbols = crypto_symbols.split('\n')
+        st.session_state.max_records = max_records
+        st.success("✅ Data collection settings saved!")
+
+def show_ai_settings():
+    """AI and LLM configuration settings"""
+    st.markdown("### 🤖 AI Configuration Settings")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### 🔑 API Keys")
+        
+        openai_key = st.text_input(
+            "OpenAI API Key",
+            type="password",
+            help="Enter your OpenAI API key for GPT models"
+        )
+        
+        openai_model = st.selectbox(
+            "OpenAI Model",
+            ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"],
+            index=0,
+            help="Select the OpenAI model to use"
+        )
+    
+    with col2:
+        st.markdown("#### ⚙️ AI Parameters")
+        
+        analysis_depth = st.selectbox(
+            "Analysis Depth",
+            ["Basic", "Detailed", "Comprehensive"],
+            index=1,
+            help="Set the depth of AI analysis"
+        )
+        
+        max_tokens = st.number_input(
+            "Max Response Tokens",
+            min_value=100,
+            max_value=4000,
+            value=1000,
+            step=100,
+            help="Maximum tokens for AI responses"
+        )
+    
+    # Save AI settings
+    if st.button("💾 Save AI Settings", type="primary"):
+        if openai_key:
+            st.session_state.openai_key = openai_key
+        st.session_state.openai_model = openai_model
+        st.session_state.analysis_depth = analysis_depth
+        st.session_state.max_tokens = max_tokens
+        st.success("✅ AI settings saved!")
+
+def show_analysis_settings():
+    """Analysis and model configuration settings"""
+    st.markdown("### 📊 Analysis Settings")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### 🔍 Anomaly Detection")
+        
+        default_contamination = st.slider(
+            "Default Contamination Rate",
+            min_value=0.01,
+            max_value=0.5,
+            value=0.1,
+            step=0.01,
+            help="Default expected proportion of anomalies"
+        )
+        
+        min_anomaly_score = st.slider(
+            "Minimum Anomaly Score",
+            min_value=0.0,
+            max_value=1.0,
+            value=0.5,
+            step=0.05,
+            help="Minimum score to consider as anomaly"
+        )
+    
+    with col2:
+        st.markdown("#### 🔧 Feature Engineering")
+        
+        include_price_features = st.checkbox("Price Features", value=True)
+        include_volume_features = st.checkbox("Volume Features", value=True)
+        include_technical_indicators = st.checkbox("Technical Indicators", value=True)
+        include_returns_features = st.checkbox("Returns Features", value=True)
+    
+    # Save analysis settings
+    if st.button("💾 Save Analysis Settings", type="primary"):
+        st.session_state.default_contamination = default_contamination
+        st.session_state.min_anomaly_score = min_anomaly_score
+        st.session_state.include_price_features = include_price_features
+        st.session_state.include_volume_features = include_volume_features
+        st.session_state.include_technical_indicators = include_technical_indicators
+        st.session_state.include_returns_features = include_returns_features
+        st.success("✅ Analysis settings saved!")
+    
+    # Reset all settings
+    st.markdown("---")
+    st.markdown("#### 🔄 Reset Settings")
+    
+    if st.button("🗑️ Reset All Settings to Default", type="secondary"):
+        st.session_state.clear()
+        st.success("✅ All settings reset to defaults!")
+        st.rerun()
 
 def show_ai_analysis_page():
     """AI-powered anomaly analysis page"""
@@ -2202,10 +2432,310 @@ def show_ai_analysis_page():
     
     # AI Configuration Section
     st.markdown("### 🤖 AI Configuration")
-    st.session_state.ai_insights.render_ai_settings()
+    
+    # Quick AI Provider Selection
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        ai_provider = st.selectbox(
+            "AI Provider",
+            ["Demo Mode", "OpenAI", "Ollama (Local)"],
+            index=0,
+            help="Choose your AI provider"
+        )
+    
+    with col2:
+        if ai_provider == "OpenAI":
+            openai_key = st.text_input("OpenAI API Key", type="password", help="Enter your OpenAI API key")
+            openai_model = st.selectbox("Model", ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"], index=0)
+        elif ai_provider == "Ollama (Local)":
+            local_model = st.selectbox("Local Model", ["llama2", "mistral", "codellama", "phi3"], index=0)
+            local_host = st.text_input("Ollama Host", value="http://localhost:11434")
+        else:
+            st.info("🎭 Using demo data for testing")
+    
+    with col3:
+        if ai_provider != "Demo Mode":
+            if st.button("🔧 Initialize AI", type="primary"):
+                if ai_provider == "OpenAI" and openai_key:
+                    st.session_state.openai_key = openai_key
+                    st.session_state.openai_model = openai_model
+                    st.session_state.use_local_llm = False
+                    st.success("✅ OpenAI initialized!")
+                elif ai_provider == "Ollama (Local)":
+                    st.session_state.use_local_llm = True
+                    st.session_state.local_model = local_model
+                    st.session_state.local_host = local_host
+                    st.success("✅ Ollama initialized!")
+                else:
+                    st.warning("⚠️ Please provide required configuration")
     
     st.markdown("---")
     
+    # Demo Mode Toggle
+    demo_mode = st.checkbox("🎭 Enable Demo Mode", value=(ai_provider == "Demo Mode"), help="Show AI analysis with sample data for testing")
+    
+    if demo_mode:
+        show_ai_demo_analysis()
+    else:
+        show_real_ai_analysis()
+
+def show_ai_demo_analysis():
+    """Demo AI analysis with sample data"""
+    st.markdown("### 🎭 Demo Mode - AI Analysis Preview")
+    st.info("💡 This is a demo showing what AI analysis would look like with real data and API keys.")
+    
+    # Sample anomalies for demo
+    sample_anomalies = [
+        {
+            'index': 45,
+            'score': 0.85,
+            'timestamp': '2024-01-15 14:30:00',
+            'symbol': 'AAPL',
+            'model': 'Isolation Forest',
+            'features': {
+                'price_change': 0.12,
+                'volume_spike': 2.3,
+                'rsi': 85.2,
+                'macd_signal': 1.45
+            }
+        },
+        {
+            'index': 78,
+            'score': 0.92,
+            'timestamp': '2024-01-15 16:45:00',
+            'symbol': 'GOOGL',
+            'model': 'Autoencoder',
+            'features': {
+                'price_change': -0.08,
+                'volume_spike': 1.8,
+                'rsi': 25.1,
+                'macd_signal': -0.67
+            }
+        },
+        {
+            'index': 123,
+            'score': 0.78,
+            'timestamp': '2024-01-16 10:15:00',
+            'symbol': 'TSLA',
+            'model': 'Isolation Forest',
+            'features': {
+                'price_change': 0.15,
+                'volume_spike': 3.1,
+                'rsi': 78.9,
+                'macd_signal': 2.12
+            }
+        }
+    ]
+    
+    st.markdown(f"### 📊 Sample Analysis: {len(sample_anomalies)} Anomalies")
+    
+    # AI Analysis Tabs
+    tab1, tab2, tab3, tab4 = st.tabs(["🔍 Anomaly Insights", "📈 Market Analysis", "💡 Trading Recommendations", "⚠️ Risk Assessment"])
+    
+    with tab1:
+        show_demo_anomaly_insights(sample_anomalies)
+    
+    with tab2:
+        show_demo_market_analysis()
+    
+    with tab3:
+        show_demo_trading_recommendations(sample_anomalies)
+    
+    with tab4:
+        show_demo_risk_assessment(sample_anomalies)
+
+def show_real_ai_analysis():
+    """Real AI analysis with actual data"""
+    # Check if we have anomalies to analyze
+    if not st.session_state.results:
+        st.warning("⚠️ No anomaly detection results available. Please run anomaly detection first.")
+        return
+    
+    # Get anomalies from results
+    anomalies = []
+    for model_name, result in st.session_state.results.items():
+        if 'anomalies' in result:
+            for anomaly in result['anomalies']:
+                anomaly['model'] = model_name
+                anomalies.append(anomaly)
+    
+    if not anomalies:
+        st.info("ℹ️ No anomalies found in the results.")
+        return
+    
+    st.markdown(f"### 📊 Found {len(anomalies)} Anomalies to Analyze")
+
+def show_demo_anomaly_insights(anomalies):
+    """Demo anomaly insights with sample data"""
+    st.markdown("#### 🔍 AI-Powered Anomaly Insights")
+    
+    for i, anomaly in enumerate(anomalies, 1):
+        with st.expander(f"Anomaly #{i}: {anomaly['symbol']} at {anomaly['timestamp']}", expanded=True):
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.metric("Anomaly Score", f"{anomaly['score']:.2f}")
+                st.metric("Model", anomaly['model'])
+                st.metric("Symbol", anomaly['symbol'])
+            
+            with col2:
+                st.metric("Price Change", f"{anomaly['features']['price_change']:.2%}")
+                st.metric("Volume Spike", f"{anomaly['features']['volume_spike']:.1f}x")
+                st.metric("RSI", f"{anomaly['features']['rsi']:.1f}")
+            
+            # AI Explanation (simulated)
+            st.markdown("**🤖 AI Analysis:**")
+            if anomaly['score'] > 0.9:
+                st.write("🚨 **High Confidence Anomaly**: This represents a significant deviation from normal market behavior. The combination of high RSI and volume spike suggests potential market manipulation or major news impact.")
+            elif anomaly['score'] > 0.8:
+                st.write("⚠️ **Medium-High Confidence Anomaly**: Unusual price movement detected. The technical indicators suggest this may be a breakout or breakdown pattern.")
+            else:
+                st.write("📊 **Medium Confidence Anomaly**: Minor deviation detected. This could indicate normal market volatility or early signs of trend change.")
+
+def show_demo_market_analysis():
+    """Demo market analysis"""
+    st.markdown("#### 📈 AI Market Analysis")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric("Market Condition", "Bullish", delta="+2.3%")
+        st.metric("Volatility Level", "Medium", delta="-0.5%")
+    
+    with col2:
+        st.metric("Sector Performance", "Technology", delta="+1.8%")
+        st.metric("Risk Level", "Moderate", delta="+0.2%")
+    
+    with col3:
+        st.metric("Market Sentiment", "Positive", delta="+0.7%")
+        st.metric("Trend Strength", "Strong", delta="+1.2%")
+    
+    st.markdown("**🤖 AI Market Summary:**")
+    st.write("""
+    The current market shows **bullish tendencies** with strong technology sector performance. 
+    The detected anomalies appear to be part of a broader market trend rather than isolated events.
+    
+    **Key Insights:**
+    - 📈 **Upward momentum** in tech stocks
+    - 🔄 **Normal market volatility** with some spikes
+    - 💪 **Strong trend continuation** expected
+    - ⚠️ **Monitor for overbought conditions** in high-RSI stocks
+    """)
+
+def show_demo_trading_recommendations(anomalies):
+    """Demo trading recommendations"""
+    st.markdown("#### 💡 AI Trading Recommendations")
+    
+    # Generate recommendations based on anomalies
+    recommendations = []
+    
+    for anomaly in anomalies:
+        if anomaly['score'] > 0.9:
+            if anomaly['features']['price_change'] > 0:
+                recommendations.append({
+                    'symbol': anomaly['symbol'],
+                    'action': 'SELL',
+                    'confidence': 'High',
+                    'reason': 'Overbought conditions with high anomaly score',
+                    'price_target': 'Current - 5%',
+                    'stop_loss': 'Current + 2%'
+                })
+            else:
+                recommendations.append({
+                    'symbol': anomaly['symbol'],
+                    'action': 'BUY',
+                    'confidence': 'High',
+                    'reason': 'Oversold conditions with high anomaly score',
+                    'price_target': 'Current + 8%',
+                    'stop_loss': 'Current - 3%'
+                })
+        elif anomaly['score'] > 0.8:
+            recommendations.append({
+                'symbol': anomaly['symbol'],
+                'action': 'HOLD',
+                'confidence': 'Medium',
+                'reason': 'Monitor for trend confirmation',
+                'price_target': 'Wait for breakout',
+                'stop_loss': 'Current - 5%'
+            })
+    
+    for i, rec in enumerate(recommendations, 1):
+        with st.expander(f"Recommendation #{i}: {rec['symbol']} - {rec['action']}", expanded=True):
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.metric("Action", rec['action'])
+                st.metric("Confidence", rec['confidence'])
+                st.metric("Price Target", rec['price_target'])
+            
+            with col2:
+                st.metric("Stop Loss", rec['stop_loss'])
+                st.metric("Risk Level", "Medium" if rec['confidence'] == 'High' else "Low")
+            
+            st.write(f"**Reasoning:** {rec['reason']}")
+    
+    if not recommendations:
+        st.info("No specific trading recommendations generated based on current anomalies.")
+
+def show_demo_risk_assessment(anomalies):
+    """Demo risk assessment"""
+    st.markdown("#### ⚠️ AI Risk Assessment")
+    
+    # Calculate risk metrics
+    high_risk_anomalies = [a for a in anomalies if a['score'] > 0.9]
+    medium_risk_anomalies = [a for a in anomalies if 0.8 < a['score'] <= 0.9]
+    low_risk_anomalies = [a for a in anomalies if a['score'] <= 0.8]
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric("High Risk Anomalies", len(high_risk_anomalies), delta=f"{len(high_risk_anomalies)/len(anomalies)*100:.1f}%")
+    
+    with col2:
+        st.metric("Medium Risk Anomalies", len(medium_risk_anomalies), delta=f"{len(medium_risk_anomalies)/len(anomalies)*100:.1f}%")
+    
+    with col3:
+        st.metric("Low Risk Anomalies", len(low_risk_anomalies), delta=f"{len(low_risk_anomalies)/len(anomalies)*100:.1f}%")
+    
+    # Risk analysis
+    st.markdown("**🤖 AI Risk Analysis:**")
+    
+    if high_risk_anomalies:
+        st.warning(f"🚨 **High Risk Alert**: {len(high_risk_anomalies)} high-confidence anomalies detected. Consider reducing position sizes or implementing additional risk controls.")
+    
+    if medium_risk_anomalies:
+        st.info(f"⚠️ **Medium Risk**: {len(medium_risk_anomalies)} medium-confidence anomalies. Monitor closely for trend changes.")
+    
+    if low_risk_anomalies:
+        st.success(f"✅ **Low Risk**: {len(low_risk_anomalies)} low-confidence anomalies. Normal market conditions.")
+    
+    # Overall risk score
+    overall_risk = (len(high_risk_anomalies) * 3 + len(medium_risk_anomalies) * 2 + len(low_risk_anomalies) * 1) / (len(anomalies) * 3)
+    
+    if overall_risk > 0.7:
+        risk_level = "High"
+        risk_color = "red"
+    elif overall_risk > 0.4:
+        risk_level = "Medium"
+        risk_color = "orange"
+    else:
+        risk_level = "Low"
+        risk_color = "green"
+    
+    st.markdown(f"**Overall Risk Level: <span style='color:{risk_color}'>{risk_level}</span>**", unsafe_allow_html=True)
+    
+    st.markdown("**Risk Mitigation Strategies:**")
+    st.write("""
+    - 📊 **Diversify portfolio** to reduce concentration risk
+    - 🛡️ **Set stop-loss orders** for all positions
+    - 📈 **Monitor position sizes** relative to risk tolerance
+    - 🔄 **Regular portfolio rebalancing** based on market conditions
+    - 📱 **Set up alerts** for significant price movements
+    """)
+
+def show_real_ai_analysis():
+    """Real AI analysis with actual data"""
     # Check if we have anomalies to analyze
     if not st.session_state.results:
         st.warning("⚠️ No anomaly detection results available. Please run anomaly detection first.")
